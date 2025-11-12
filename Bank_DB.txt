@@ -1,0 +1,99 @@
+-- 🧠 Login (if not already)
+-- mysql -u root -p
+
+-- ✅ Step 1: Create Database
+CREATE DATABASE IF NOT EXISTS BankDB;
+USE BankDB;
+
+-- 🏦 Step 2: Create Bank Table
+CREATE TABLE Bank (
+    bank_id INT PRIMARY KEY AUTO_INCREMENT,
+    bank_name VARCHAR(100) NOT NULL UNIQUE,
+    ho_address VARCHAR(200) NOT NULL,
+    contactno VARCHAR(15) NOT NULL UNIQUE
+);
+
+-- 🏢 Step 3: Create Branch Table
+CREATE TABLE Branch (
+    branch_id INT PRIMARY KEY AUTO_INCREMENT,
+    bank_id INT NOT NULL,
+    branch_name VARCHAR(100) NOT NULL,
+    ifsc VARCHAR(20) UNIQUE NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    state VARCHAR(50) NOT NULL,
+    pincode CHAR(6) CHECK (pincode REGEXP '^[0-9]{6}$'),
+    FOREIGN KEY (bank_id) REFERENCES Bank(bank_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- 👤 Step 4: Create Customer Table
+CREATE TABLE Customer (
+    customerid INT PRIMARY KEY AUTO_INCREMENT,
+    fname VARCHAR(30) NOT NULL,
+    mname VARCHAR(30),
+    lname VARCHAR(30) NOT NULL,
+    gender VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other')),
+    dob DATE NOT NULL,
+    phone VARCHAR(15) UNIQUE NOT NULL,
+    create_on DATE DEFAULT (CURRENT_DATE)
+);
+
+-- 💰 Step 5: Create Account Table
+CREATE TABLE Account (
+    account_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    branch_id INT NOT NULL,
+    account_no VARCHAR(20) UNIQUE NOT NULL,
+    account_type VARCHAR(20) CHECK (account_type IN ('Savings', 'Current', 'Fixed Deposit')),
+    balance DECIMAL(12,2) CHECK (balance >= 0) DEFAULT 0.00,
+    status VARCHAR(20) DEFAULT 'Active',
+    open_on DATE DEFAULT (CURRENT_DATE),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customerid)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (branch_id) REFERENCES Branch(branch_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- ✅ Step 6: Verify table creation
+SHOW TABLES;
+
+-- ✅ Step 7: Describe each table (optional for checking)
+DESCRIBE Bank;
+DESCRIBE Branch;
+DESCRIBE Customer;
+DESCRIBE Account;
+
+-- ===========================================================
+-- ✨ Now apply required modifications as per the question
+-- ===========================================================
+
+-- 1️⃣ Add a new column `email` to Customer table (unique)
+ALTER TABLE Customer
+ADD COLUMN email VARCHAR(120) UNIQUE;
+
+-- 2️⃣ Modify column size of branch_name in Branch table to VARCHAR(120)
+ALTER TABLE Branch
+MODIFY COLUMN branch_name VARCHAR(120) NOT NULL;
+
+-- 3️⃣ Rename table Account to CustomerAccount
+RENAME TABLE Account TO CustomerAccount;
+
+-- 4️⃣ Rename column ifsc to ifsc_code in Branch table
+ALTER TABLE Branch
+CHANGE COLUMN ifsc ifsc_code VARCHAR(20) UNIQUE NOT NULL;
+
+-- 5️⃣ Create an index on branch_id column of CustomerAccount table
+CREATE INDEX idx_branch_id ON CustomerAccount(branch_id);
+
+-- ✅ Step 8: Final verification after modifications
+SHOW TABLES;
+
+DESCRIBE Bank;
+DESCRIBE Branch;
+DESCRIBE Customer;
+DESCRIBE CustomerAccount;
+
+SHOW INDEXES FROM CustomerAccount;

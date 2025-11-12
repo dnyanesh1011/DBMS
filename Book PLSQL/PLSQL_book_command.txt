@@ -1,0 +1,23 @@
+CREATE TABLE Borrower (
+    Roll_no NUMBER PRIMARY KEY,
+    Name VARCHAR2(50),
+    DateofIssue DATE,
+    NameofBook VARCHAR2(100),
+    Status CHAR(1)
+);
+
+CREATE TABLE Fine (
+    Roll_no NUMBER,
+    FineDate DATE,
+    Amt NUMBER
+);
+
+INSERT INTO Borrower VALUES (101, 'Sarthak', TO_DATE('2025-10-10', 'YYYY-MM-DD'), 'Database Systems', 'I');
+INSERT INTO Borrower VALUES (102, 'Amit', TO_DATE('2025-10-20', 'YYYY-MM-DD'), 'Operating Systems', 'I');
+INSERT INTO Borrower VALUES (103, 'Priya', TO_DATE('2025-09-25', 'YYYY-MM-DD'), 'DBMS Concepts', 'R');
+
+COMMIT;
+
+SET SERVEROUTPUT ON;
+
+@"C:\Users\sarth\OneDrive\Desktop\PLSQLBOOK.sql"

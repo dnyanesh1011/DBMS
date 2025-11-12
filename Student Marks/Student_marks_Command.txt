@@ -1,0 +1,14 @@
+create table student_mark(roll_no int, name varchar(50), total_mark int);
+
+insert into student_mark values (101, 'Vedant', 580);
+insert into student_mark values (102, 'Ayush', 300);
+insert into student_mark values (103, 'Aryan', 400);
+
+create table student_result(roll_no int, name varchar2(50), grade varchar(20));
+
+@C:\Users\System05\Documents\sqlplus\Program1.sql
+
+set serveroutput on
+@C:\Users\System05\Documents\sqlplus\Program2.sql
+
+select * from student_result;

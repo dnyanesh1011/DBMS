@@ -1,0 +1,146 @@
+-- 🧠 Step 1: Create Database
+CREATE DATABASE IF NOT EXISTS SalesDB;
+USE SalesDB;
+
+-- 👤 Step 2: Create Customer Table
+CREATE TABLE Customer (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100) NOT NULL,
+    city VARCHAR(50),
+    email VARCHAR(120) UNIQUE NOT NULL
+);
+
+-- 📦 Step 3: Create Product Table
+CREATE TABLE Product (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(100) NOT NULL,
+    category VARCHAR(50),
+    price DECIMAL(10,2) CHECK (price >= 0)
+);
+
+-- 💰 Step 4: Create Sale Table
+CREATE TABLE Sale (
+    sale_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT CHECK (quantity > 0),
+    sale_date DATE DEFAULT (CURRENT_DATE),
+    total_amount DECIMAL(12,2) CHECK (total_amount >= 0),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES Product(product_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- ✅ Step 5: Insert Sample Data
+INSERT INTO Customer (customer_id, customer_name, city, email) VALUES
+(1, 'Amit Sharma', 'Pune', 'amit@shop.com'),
+(2, 'Neha Singh', 'Mumbai', 'neha@shop.com'),
+(3, 'Ravi Kumar', 'Delhi', 'ravi@shop.com'),
+(4, 'Priya Nair', 'Pune', 'priya@shop.com');
+
+INSERT INTO Product (product_id, product_name, category, price) VALUES
+(1, 'Smartphone', 'Electronics', 25000.00),
+(2, 'Laptop', 'Electronics', 55000.00),
+(3, 'Washing Machine', 'Appliances', 20000.00),
+(4, 'Mixer Grinder', 'Appliances', 5000.00),
+(5, 'Shoes', 'Fashion', 2500.00);
+
+INSERT INTO Sale (sale_id, customer_id, product_id, quantity, sale_date, total_amount) VALUES
+(1, 1, 1, 1, '2025-10-01', 25000.00),
+(2, 1, 5, 2, '2025-10-05', 5000.00),
+(3, 2, 2, 1, '2025-10-10', 55000.00),
+(4, 2, 4, 1, '2025-10-12', 5000.00),
+(5, 3, 3, 1, '2025-10-15', 20000.00),
+(6, 4, 1, 1, '2025-10-18', 25000.00),
+(7, 4, 5, 1, '2025-10-19', 2500.00),
+(8, 3, 4, 2, '2025-10-20', 10000.00);
+
+-- ===========================================================
+-- 🧮 PART A: AGGREGATION OPERATIONS
+-- ===========================================================
+
+-- 1️⃣ Calculate total sales amount per customer
+SELECT 
+    c.customer_name,
+    SUM(s.total_amount) AS TotalSalesAmount
+FROM Customer c
+JOIN Sale s ON c.customer_id = s.customer_id
+GROUP BY c.customer_id, c.customer_name;
+
+-- 2️⃣ Find total quantity sold for each product
+SELECT 
+    p.product_name,
+    SUM(s.quantity) AS TotalQuantitySold
+FROM Product p
+JOIN Sale s ON p.product_id = s.product_id
+GROUP BY p.product_id, p.product_name;
+
+-- 3️⃣ Find the highest and lowest product prices
+SELECT 
+    MAX(price) AS HighestPrice,
+    MIN(price) AS LowestPrice
+FROM Product;
+
+-- 4️⃣ Find average sales amount per city
+SELECT 
+    c.city,
+    AVG(s.total_amount) AS AvgSalesAmount
+FROM Customer c
+JOIN Sale s ON c.customer_id = s.customer_id
+GROUP BY c.city;
+
+-- 5️⃣ Find total sales and count of transactions per category
+SELECT 
+    p.category,
+    SUM(s.total_amount) AS TotalSales,
+    COUNT(s.sale_id) AS TransactionCount
+FROM Product p
+JOIN Sale s ON p.product_id = s.product_id
+GROUP BY p.category;
+
+-- ===========================================================
+-- 🧩 PART B: SUBQUERY OPERATIONS
+-- ===========================================================
+
+-- 1️⃣ Customers whose total purchase > average sales amount of all customers
+SELECT 
+    c.customer_name,
+    SUM(s.total_amount) AS TotalPurchase
+FROM Customer c
+JOIN Sale s ON c.customer_id = s.customer_id
+GROUP BY c.customer_id, c.customer_name
+HAVING SUM(s.total_amount) > (
+    SELECT AVG(total_amount) FROM Sale
+);
+
+-- 2️⃣ Temporary summary (customer total sales > ₹10,000)
+CREATE TEMPORARY TABLE CustomerSummary AS
+SELECT 
+    c.customer_id,
+    c.customer_name,
+    SUM(s.total_amount) AS TotalSales
+FROM Customer c
+JOIN Sale s ON c.customer_id = s.customer_id
+GROUP BY c.customer_id, c.customer_name;
+
+SELECT * FROM CustomerSummary WHERE TotalSales > 10000;
+
+-- 3️⃣ Display each product along with the number of times it was sold
+SELECT 
+    p.product_name,
+    COUNT(s.sale_id) AS TimesSold
+FROM Product p
+LEFT JOIN Sale s ON p.product_id = s.product_id
+GROUP BY p.product_id, p.product_name;
+
+-- 4️⃣ List customers who purchased at least one product in 'Electronics' category
+SELECT DISTINCT 
+    c.customer_name,
+    c.city
+FROM Customer c
+JOIN Sale s ON c.customer_id = s.customer_id
+JOIN Product p ON s.product_id = p.product_id
+WHERE p.category = 'Electronics';

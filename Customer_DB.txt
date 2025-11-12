@@ -1,0 +1,69 @@
+-- 🧠 Login to MySQL
+-- mysql -u root -p
+
+-- ✅ Step 1: Create Database
+CREATE DATABASE IF NOT EXISTS CustomerDB;
+USE CustomerDB;
+
+-- 👤 Step 2: Create Customer Table
+CREATE TABLE Customer (
+    CustomerID INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(100) NOT NULL,
+    Address VARCHAR(200),
+    Phone VARCHAR(15) UNIQUE NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL
+);
+
+-- 💳 Step 3: Create Account Table
+CREATE TABLE Account (
+    AccountID INT PRIMARY KEY AUTO_INCREMENT,
+    CustomerID INT NOT NULL,
+    AccountType VARCHAR(20) CHECK (AccountType IN ('Savings', 'Current', 'Fixed Deposit')),
+    Balance DECIMAL(12,2) CHECK (Balance >= 0) DEFAULT 0.00,
+    CreatedDate DATE DEFAULT (CURRENT_DATE),
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- 💵 Step 4: Create Transaction Table
+CREATE TABLE TransactionTable (
+    TransactionID INT PRIMARY KEY AUTO_INCREMENT,
+    AccountID INT NOT NULL,
+    TransactionType VARCHAR(10) CHECK (TransactionType IN ('Credit', 'Debit')),
+    Amount DECIMAL(12,2) CHECK (Amount > 0),
+    TransactionDate DATE DEFAULT (CURRENT_DATE),
+    FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- ✅ Step 5: Verify table creation
+SHOW TABLES;
+
+DESCRIBE Customer;
+DESCRIBE Account;
+DESCRIBE TransactionTable;
+
+-- ===========================================================
+-- ✨ Step 6: Implement problem-specific requirements
+-- ===========================================================
+
+-- 1️⃣ Create a view to display customer name, account ID, and current balance
+CREATE OR REPLACE VIEW CustomerAccountView AS
+SELECT 
+    c.Name AS CustomerName,
+    a.AccountID,
+    a.Balance AS CurrentBalance
+FROM Customer c
+JOIN Account a ON c.CustomerID = a.CustomerID;
+
+-- 2️⃣ Create an index on TransactionDate in Transaction table
+CREATE INDEX idx_transaction_date ON TransactionTable(TransactionDate);
+
+-- ✅ Step 7: Verify the view and index
+SHOW FULL TABLES;
+SHOW INDEXES FROM TransactionTable;
+
+-- ✅ Step 8: Test the view (optional)
+-- SELECT * FROM CustomerAccountView;

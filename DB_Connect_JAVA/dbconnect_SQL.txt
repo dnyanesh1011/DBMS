@@ -1,0 +1,23 @@
+-- Create the database
+CREATE DATABASE testdb;
+USE testdb;
+
+-- Create persons table
+CREATE TABLE persons (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100),
+  age INT
+);
+
+-- Insert some sample data
+INSERT INTO persons (name, email, age) VALUES
+('Sarthak', 'sarthak@gmail.com', 21),
+('Riya', 'riya@gmail.com', 22),
+('Amit', 'amit@yahoo.com', 23),
+('Neha', 'neha@gmail.com', 20);
+
+COMMIT;
+
+-- Check inserted data
+SELECT * FROM persons;

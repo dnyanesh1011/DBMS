@@ -1,0 +1,78 @@
+
+use libraryDB;
+
+db.createCollection("books");
+
+db.books.insertMany([
+  {
+    title: "mongodb",
+    description: "Database for modern apps",
+    by: "john",
+    url: "https://mongodb.com",
+    tags: ["database", "NoSQL", "document"],
+    likes: 120
+  },
+  {
+    title: "nosql overview",
+    description: "Introduction to NoSQL databases",
+    by: "mike",
+    url: "https://nosql.com",
+    tags: ["NoSQL", "database"],
+    likes: 55
+  },
+  {
+    title: "nodejs basics",
+    description: "Node.js introduction",
+    by: "john",
+    url: "https://nodejs.org",
+    tags: ["JavaScript", "backend"],
+    likes: 15
+  },
+  {
+    title: "express guide",
+    description: "Building web apps using Express",
+    by: "alice",
+    url: "https://expressjs.com",
+    tags: ["Node.js", "framework"],
+    likes: 8
+  },
+  {
+    title: "react tutorial",
+    description: "Frontend library React.js",
+    by: "emma",
+    url: "https://reactjs.org",
+    tags: ["frontend", "JavaScript"],
+    likes: 200
+  }
+]);
+
+db.books.insertOne({
+  title: "mongodb advanced",
+  description: "Deep dive into MongoDB features",
+  by: "john",
+  url: "https://mongodb.com/advanced",
+  tags: ["database", "NoSQL"],
+  likes: 90,
+  username: "sarthak",
+  comments: "Very useful resource for learning advanced MongoDB"
+});
+
+db.books.find({ title: "mongodb" });
+
+db.books.find({ $or: [{ by: "john" }, { title: "mongodb" }] });
+
+db.books.find({ $and: [{ title: "mongodb" }, { by: "john" }] });
+
+db.books.find({ likes: { $gt: 10 } });
+
+db.books.find({ likes: { $gt: 100 }, $or: [{ title: "mongodb" }, { by: "john" }] });
+
+db.books.updateOne({ title: "mongodb" }, { $set: { title: "mongodb overview" } });
+
+db.books.deleteOne({ title: "nosql overview" });
+
+db.books.find({ by: "john" }).limit(2);
+
+db.books.find({ by: "john" }).skip(1).limit(1);
+
+db.books.find().sort({ title: 1 });

@@ -1,0 +1,79 @@
+
+use shopDB;
+
+db.createCollection("orders");
+
+db.orders.insertMany([
+  { cus_id: "A1", amount: 400, status: "P" },
+  { cus_id: "B1", amount: 300, status: "D" },
+  { cus_id: "A1", amount: 200, status: "F" },
+  { cus_id: "C1", amount: 200, status: "F" },
+  { cus_id: "B1", amount: 700, status: "P" },
+  { cus_id: "B1", amount: 800, status: "P" }
+]);
+
+// 1. Sum of amount for each customer whose status is 'P'
+var mapFunction1 = function() {
+  if (this.status === "P") {
+    emit(this.cus_id, this.amount);
+  }
+};
+
+var reduceFunction1 = function(key, values) {
+  return Array.sum(values);
+};
+
+db.orders.mapReduce(mapFunction1, reduceFunction1, { out: "sum_pending" });
+
+db.sum_pending.find();
+
+// 2. Average amount of each customer
+var mapFunction2 = function() {
+  emit(this.cus_id, { sum: this.amount, count: 1 });
+};
+
+var reduceFunction2 = function(key, values) {
+  var result = { sum: 0, count: 0 };
+  values.forEach(function(value) {
+    result.sum += value.sum;
+    result.count += value.count;
+  });
+  return result;
+};
+
+var finalizeFunction2 = function(key, reducedValue) {
+  reducedValue.avg = reducedValue.sum / reducedValue.count;
+  return reducedValue;
+};
+
+db.orders.mapReduce(mapFunction2, reduceFunction2, { out: "avg_amount", finalize: finalizeFunction2 });
+
+db.avg_amount.find();
+
+// 3. Minimum amount of each customer
+var mapFunction3 = function() {
+  emit(this.cus_id, this.amount);
+};
+
+var reduceFunction3 = function(key, values) {
+  return Math.min.apply(Math, values);
+};
+
+db.orders.mapReduce(mapFunction3, reduceFunction3, { out: "min_amount" });
+
+db.min_amount.find();
+
+// 4. Maximum amount for each customer whose status is 'F'
+var mapFunction4 = function() {
+  if (this.status === "F") {
+    emit(this.cus_id, this.amount);
+  }
+};
+
+var reduceFunction4 = function(key, values) {
+  return Math.max.apply(Math, values);
+};
+
+db.orders.mapReduce(mapFunction4, reduceFunction4, { out: "max_failed" });
+
+db.max_failed.find();

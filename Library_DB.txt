@@ -1,0 +1,108 @@
+-- 🧠 Step 1: Create Database
+CREATE DATABASE IF NOT EXISTS LibraryDB;
+USE LibraryDB;
+
+-- 📘 Step 2: Create Books Table
+CREATE TABLE Books (
+    b_id INT PRIMARY KEY AUTO_INCREMENT,
+    isbn VARCHAR(20) UNIQUE NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    genre VARCHAR(50),
+    copies INT CHECK (copies >= 0)
+);
+
+-- 👤 Step 3: Create Members Table
+CREATE TABLE Members (
+    m_id INT PRIMARY KEY AUTO_INCREMENT,
+    m_name VARCHAR(100) NOT NULL,
+    email VARCHAR(120) UNIQUE NOT NULL,
+    phone VARCHAR(15) UNIQUE NOT NULL,
+    join_date DATE DEFAULT (CURRENT_DATE)
+);
+
+-- 📚 Step 4: Create IssuedBooks Table
+CREATE TABLE IssuedBooks (
+    issue_id INT PRIMARY KEY AUTO_INCREMENT,
+    m_id INT NOT NULL,
+    b_id INT NOT NULL,
+    issue_date DATE DEFAULT (CURRENT_DATE),
+    due_date DATE,
+    return_date DATE,
+    FOREIGN KEY (m_id) REFERENCES Members(m_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (b_id) REFERENCES Books(b_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- ✅ Step 5: Insert Data into Books Table
+INSERT INTO Books (b_id, isbn, title, author, genre, copies) VALUES
+(1, '70777', 'Database System Concepts', 'Silberschatz', 'DBMS', 5),
+(2, '5398', 'Fundamentals of Database Systems', 'Elmasri & Navathe', 'DBMS', 4),
+(3, '3627', 'The C Programming Language', 'Kernighan & Ritchie', 'Programming', 3),
+(4, '7660', 'Designing Data-Intensive Applications', 'Kleppmann', 'Data', 2),
+(5, '30735', 'Let Us C', 'Yashavant Kanetkar', 'Programming', 6);
+
+-- ✅ Step 6: Insert Data into Members Table
+INSERT INTO Members (m_id, m_name, email, phone, join_date) VALUES
+(1, 'Asha Patil', 'asha@library.test', '9876500011', '2025-06-10'),
+(2, 'Rahul Deshmukh', 'rahul@library.test', '9876500022', '2025-07-01'),
+(3, 'Priya Kulkarni', 'priya@library.test', '9876500033', '2025-07-15'),
+(4, 'Vikram Joshi', 'vikram@library.test', '9876500044', '2025-08-05');
+
+-- ✅ Step 7: Insert Data into IssuedBooks Table
+INSERT INTO IssuedBooks (issue_id, m_id, b_id, issue_date, due_date, return_date) VALUES
+(1, 1, 2, '2025-10-20', '2025-11-03', NULL),
+(2, 1, 5, '2025-09-10', '2025-09-24', '2025-09-20'),
+(3, 2, 1, '2025-10-25', '2025-11-08', NULL),
+(4, 3, 4, '2025-09-15', '2025-09-29', '2025-09-28'),
+(5, 4, 3, '2025-10-01', '2025-10-15', NULL);
+
+-- ===========================================================
+-- ✨ Step 8: Queries as per problem statement
+-- ===========================================================
+
+-- 1️⃣ Display members and the books they have issued using INNER JOIN
+SELECT 
+    m.m_name AS MemberName,
+    b.title AS BookTitle,
+    b.author AS Author
+FROM Members m
+INNER JOIN IssuedBooks i ON m.m_id = i.m_id
+INNER JOIN Books b ON i.b_id = b.b_id;
+
+-- 2️⃣ Show all members and the books they issued using LEFT OUTER JOIN
+SELECT 
+    m.m_name AS MemberName,
+    b.title AS BookTitle,
+    i.issue_date
+FROM Members m
+LEFT JOIN IssuedBooks i ON m.m_id = i.m_id
+LEFT JOIN Books b ON i.b_id = b.b_id;
+
+-- 3️⃣ Show all books and who issued them using RIGHT OUTER JOIN
+SELECT 
+    m.m_name AS MemberName,
+    b.title AS BookTitle,
+    i.issue_date
+FROM Members m
+RIGHT JOIN IssuedBooks i ON m.m_id = i.m_id
+RIGHT JOIN Books b ON i.b_id = b.b_id;
+
+-- 4️⃣ Using Subquery (WHERE clause) – Find members who issued books authored by ‘Navathe’
+SELECT m_name
+FROM Members
+WHERE m_id IN (
+    SELECT i.m_id
+    FROM IssuedBooks i
+    JOIN Books b ON i.b_id = b.b_id
+    WHERE b.author LIKE '%Navathe%'
+);
+
+-- 5️⃣ Using Subquery (SELECT clause) – Count of books issued by each Member
+SELECT 
+    m.m_name AS MemberName,
+    (SELECT COUNT(*) FROM IssuedBooks i WHERE i.m_id = m.m_id) AS BooksIssuedCount
+FROM Members m;

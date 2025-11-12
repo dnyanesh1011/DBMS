@@ -1,0 +1,88 @@
+-- 🧠 Login to MySQL
+-- mysql -u root -p
+
+-- ✅ Step 1: Create Database
+CREATE DATABASE IF NOT EXISTS StudentDB;
+USE StudentDB;
+
+-- 🏢 Step 2: Create Department Table
+CREATE TABLE Department (
+    dept_id INT PRIMARY KEY AUTO_INCREMENT,
+    DeptName VARCHAR(100) NOT NULL UNIQUE,
+    HOD_Name VARCHAR(100) NOT NULL
+);
+
+-- 👨‍🎓 Step 3: Create Student Table
+CREATE TABLE Student (
+    RegID INT PRIMARY KEY AUTO_INCREMENT,
+    rollno VARCHAR(20) UNIQUE NOT NULL,
+    fname VARCHAR(30) NOT NULL,
+    mname VARCHAR(30),
+    lname VARCHAR(30) NOT NULL,
+    gender VARCHAR(10) CHECK (gender IN ('Male', 'Female', 'Other')),
+    dept_id INT NOT NULL,
+    FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- 📘 Step 4: Create Course Table
+CREATE TABLE Course (
+    CID INT PRIMARY KEY AUTO_INCREMENT,
+    course_name VARCHAR(100) NOT NULL,
+    credit INT CHECK (credit > 0)
+);
+
+-- 🧾 Step 5: Create Enrollment Table
+CREATE TABLE Enrollment (
+    enid INT PRIMARY KEY AUTO_INCREMENT,
+    RegID INT NOT NULL,
+    DeptID INT NOT NULL,
+    FOREIGN KEY (RegID) REFERENCES Student(RegID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (DeptID) REFERENCES Department(dept_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+-- ✅ Step 6: Verify table creation
+SHOW TABLES;
+
+-- ✅ Step 7: Describe each table (optional)
+DESCRIBE Department;
+DESCRIBE Student;
+DESCRIBE Course;
+DESCRIBE Enrollment;
+
+-- ===========================================================
+-- ✨ Now apply modifications as per the problem statement
+-- ===========================================================
+
+-- 1️⃣ Add a new column email to Student table (unique)
+ALTER TABLE Student
+ADD COLUMN email VARCHAR(120) UNIQUE;
+
+-- 2️⃣ Modify column size of course_name in Course table to VARCHAR(120)
+ALTER TABLE Course
+MODIFY COLUMN course_name VARCHAR(120) NOT NULL;
+
+-- 3️⃣ Rename table Enrollment to StudentEnrollment
+RENAME TABLE Enrollment TO StudentEnrollment;
+
+-- 4️⃣ Rename column CID in Course table to course_no
+ALTER TABLE Course
+CHANGE COLUMN CID course_no INT PRIMARY KEY AUTO_INCREMENT;
+
+-- 5️⃣ Create an index on dept_id column of Student table
+CREATE INDEX idx_dept_id ON Student(dept_id);
+
+-- ✅ Step 8: Verify final structure
+SHOW TABLES;
+
+DESCRIBE Department;
+DESCRIBE Student;
+DESCRIBE Course;
+DESCRIBE StudentEnrollment;
+
+SHOW INDEXES FROM Student;

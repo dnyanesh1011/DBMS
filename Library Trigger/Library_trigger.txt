@@ -1,0 +1,29 @@
+-- Create Books table
+CREATE TABLE Books (
+    AccNo NUMBER PRIMARY KEY,
+    Title VARCHAR2(100),
+    Author VARCHAR2(50),
+    Publisher VARCHAR2(50),
+    Count NUMBER
+);
+
+-- Create Library_Audit table
+CREATE TABLE Library_Audit (
+    AccNo NUMBER,
+    Title VARCHAR2(100),
+    Author VARCHAR2(50),
+    Publisher VARCHAR2(50),
+    Count NUMBER,
+    Action_Type VARCHAR2(20),
+    Action_Date DATE
+);
+
+-- Insert sample records into Books
+INSERT INTO Books VALUES (101, 'Database Systems', 'Navathe', 'Pearson', 5);
+INSERT INTO Books VALUES (102, 'Operating Systems', 'Galvin', 'Wiley', 3);
+INSERT INTO Books VALUES (103, 'Data Structures', 'Lipschutz', 'McGraw Hill', 4);
+
+COMMIT;
+
+-- To check the initial data
+SELECT * FROM Books;
